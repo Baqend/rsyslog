@@ -337,7 +337,7 @@ dbgprintf("ommongodb: secfrac is %d, precision %d\n",  pMsg->tTIMESTAMP.secfrac,
 
 static bson *BSONFromJSONArray(struct json_object *json);
 static bson *BSONFromJSONObject(struct json_object *json);
-static bson *BSONAppendExtendedJSON(bson *doc, const gchar *name, struct json_object *json);
+static gboolean BSONAppendExtendedJSON(bson *doc, const gchar *name, struct json_object *json);
 
 /* Append a BSON variant of json to doc using name.  Return TRUE on success */
 static gboolean
