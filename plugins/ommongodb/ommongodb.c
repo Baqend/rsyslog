@@ -404,23 +404,28 @@ static gboolean
 BSONAppendExtendedJSON(bson *doc, const gchar *name, struct json_object *json)
 {
     struct lh_entry *entry;
-    char *key;
 
     entry = json_object_get_object(json)->head;
-    key = (char*)entry->k;
-    if (strcmp(key, "$date") == 0) {
-        DBGPRINTF("ommongodb: extended json date detected %s", json_object_get_string(entry->v));
+    if (entry) {
+        char *key;
+        key = (char*)entry->k;
+        if (strcmp(key, "$date") == 0) {
+            struct tm tm;
+            gint64 ts;
+            struct json_object *val;
 
-        struct tm tm;
-        gint64 ts;
+            val = (struct json_object*)entry->v;
 
-        tm.tm_isdst = -1;
-        strptime(json_object_get_string(entry->v), "%Y-%m-%dT%H:%M:%S%z", &tm);
-        ts = 1000 * (gint64) mktime(&tm);
-        return bson_append_utc_datetime(doc, name, ts);
-    } else {
-        return FALSE;
+            DBGPRINTF("ommongodb: extended json date detected %s", json_object_get_string(val));
+
+            tm.tm_isdst = -1;
+            strptime(json_object_get_string(val), "%Y-%m-%dT%H:%M:%S%z", &tm);
+            ts = 1000 * (gint64) mktime(&tm);
+            return bson_append_utc_datetime(doc, name, ts);
+        }
     }
+
+    return FALSE;
 }
 
 /* Return a BSON variant of json, which must be a json_type_array */
